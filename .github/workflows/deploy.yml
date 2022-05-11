@@ -7,7 +7,7 @@ name: Build and Deploy to Cloud Run
 env:
   PROJECT_ID: test-darwin-328107
   SERVICE: testaction
-  REGION: us-central1
+  REGION: us-east1
 
 jobs:
   deploy:
@@ -41,7 +41,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v0
 
     - name: Authorize Docker push
-      run: gcloud auth configure-docker
+      run: gcloud auth configure-docker us-east1-docker.pkg.dev
 
     - name: Build and Push Container
       run: |-
