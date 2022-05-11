@@ -47,10 +47,3 @@ jobs:
       run: |-
         docker build -t us-east1-docker.pkg.dev/test-darwin-328107/hello-world/actionimage .
         docker push us-east1-docker.pkg.dev/test-darwin-328107/hello-world/actionimage
-    - name: Deploy to Cloud Run
-      run: |-
-        gcloud run deploy ${{ env.SERVICE }} \
-          --region ${{ env.REGION }} \
-          --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} \
-          --platform "managed" \
-          --quiet
