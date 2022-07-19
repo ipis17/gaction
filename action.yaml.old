@@ -1,0 +1,49 @@
+on:
+  push:
+    branches:
+    - master
+
+name: Build and Deploy to Cloud Run
+env:
+  PROJECT_ID: test-darwin-328107
+  SERVICE: testaction
+  REGION: us-east1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Configure Workload Identity Federation and generate an access token.
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        workload_identity_provider: 'projects/358267375854/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+        service_account: 'gaction@test-darwin-328107.iam.gserviceaccount.com'
+
+    # Alternative option - authentication via credentials json
+    # - id: 'auth'
+    #   uses: 'google-github-actions/auth@v0'
+    #   with:
+    #     credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    # Setup gcloud CLI
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+
+    - name: Authorize Docker push
+      run: gcloud auth configure-docker us-east1-docker.pkg.dev
+
+    - name: Build and Push Container
+      run: |-
+        docker build -t us-east1-docker.pkg.dev/test-darwin-328107/hello-world/actionimage .
+        docker push us-east1-docker.pkg.dev/test-darwin-328107/hello-world/actionimage
